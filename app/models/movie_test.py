@@ -1,5 +1,5 @@
 import unittest
-from models import movie
+from app.main import movie
 Movie = movie.Movie
 
 class MovieTest(unittest.TestCase):

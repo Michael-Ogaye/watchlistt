@@ -1,9 +1,9 @@
-from app import app
+from . import create_app
 import urllib.request,json
-from .models import movie
+from .main import movie
 Movie = movie.Movie
 
-
+app= create_app('development')
 # Getting api key
 api_key = app.config['MOVIE_API_KEY']
 # Getting the movie base url

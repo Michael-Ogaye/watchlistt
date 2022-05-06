@@ -1,11 +1,10 @@
 from flask import render_template,request,redirect,url_for,abort
 from . import main
 from ..request import get_movies,get_movie,search_movie
-from .review import Review
 from .forms import ReviewForm,UpdateProfile
 from flask_login import login_required
-from ..dbmodels import User
-from .. import db
+from ..dbmodels import User,Review
+from .. import db,photos
 
 
 
@@ -80,10 +79,17 @@ def new_review(id):
     if form.validate_on_submit():
         title = form.title.data
         review = form.review.data
-        new_review = Review(movie.id,title,movie.poster,review)
-        new_review.save_review()
-        return redirect(url_for('main.movie',id = movie.id ))
+        # new_review = Review(movie.id,title,movie.poster,review)
+        # new_review.save_review()
 
+         # Updated review instance
+        new_review = Review(movie_id=movie.id,movie_title=title,image_path=movie.poster,movie_review=review,user=current_user)
+
+        # save review method
+        new_review.save_review()
+        return redirect(url_for('.movie',id = movie.id ))
+        
+       
     title = f'{movie.title} review'
     return render_template('new_review.html',title = title, review_form=form, movie=movie)
 
@@ -117,3 +123,16 @@ def update_profile(uname):
         return redirect(url_for('.profile',uname=user.username))
 
     return render_template('profile/update.html',form =form)
+
+
+
+@main.route('/user/<uname>/update/pic',methods= ['POST'])
+@login_required
+def update_pic(uname):
+    user = User.query.filter_by(username = uname).first()
+    if 'photo' in request.files:
+        filename = photos.save(request.files['photo'])
+        path = f'photos/{filename}'
+        user.profile_pic_path = path
+        db.session.commit()
+    return redirect(url_for('main.profile',uname=uname))
